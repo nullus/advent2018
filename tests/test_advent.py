@@ -31,7 +31,7 @@
 
 from pytest import mark
 
-from advent import day_1_1
+from advent import day_1_1, day_1_2
 
 
 test_day_1_1_data = [
@@ -44,3 +44,16 @@ test_day_1_1_data = [
 @mark.parametrize("adjustment, frequency", test_day_1_1_data)
 def test_day_1_1(adjustment, frequency):
     assert day_1_1(adjustment) == frequency
+
+
+test_day_1_2_data = [
+    ["+1 -1", 0],
+    ["+3 +3 +4 -2 -4", 10],
+    ["-6 +3 +8 +5 -6", 5],
+    ["+7 +7 -2 -7 -4", 14],
+]
+
+
+@mark.parametrize("adjustment, frequency", test_day_1_2_data)
+def test_day_1_2(adjustment, frequency):
+    assert day_1_2(adjustment) == frequency

@@ -27,7 +27,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+from itertools import cycle
+from typing import Set
 
 
 def day_1_1(adjustments: str) -> int:
     return sum(int(i) for i in adjustments.split())
+
+
+def day_1_2(adjustments: str) -> int:
+    frequencies: Set[int] = {0}
+    value = 0
+    for i in cycle(adjustments.split()):
+        value += int(i)
+        if value in frequencies:
+            return value
+        frequencies.add(value)
