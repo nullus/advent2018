@@ -27,3 +27,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+
+
+def day_1_1(adjustments: str) -> int:
+    return sum(int(i) for i in adjustments.split())

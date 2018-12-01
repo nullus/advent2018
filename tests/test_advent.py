@@ -29,5 +29,18 @@
 #
 
 
-def test_test():
-    assert True
+from pytest import mark
+
+from advent import day_1_1
+
+
+test_day_1_1_data = [
+    ["+1 +1 +1", 3],
+    ["+1 +1 -2", 0],
+    ["-1 -2 -3", -6],
+]
+
+
+@mark.parametrize("adjustment, frequency", test_day_1_1_data)
+def test_day_1_1(adjustment, frequency):
+    assert day_1_1(adjustment) == frequency
