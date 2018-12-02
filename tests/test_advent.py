@@ -31,7 +31,7 @@
 
 from pytest import mark
 
-from advent import day_1_1, day_1_2, day_2_1_count, day_2_1
+from advent import day_1_1, day_1_2, day_2_1_count, day_2_1, day_2_2, day_2_2_common_elements
 
 test_day_1_1_data = [
     ["+1 +1 +1", 3],
@@ -101,4 +101,16 @@ wvxyz
 
 
 def test_day_2_2():
-    assert day_2_2(test_day_2_2_data) == "fgij"
+    assert "fgij" == day_2_2(test_day_2_2_data)
+
+
+test_day_2_2_common_elements_data = [
+    ["fguij", "fghij", "fgij"],
+    ["abcde", "pqrst", ""],
+    ["abcde", "axcye", "ace"],
+]
+
+
+@mark.parametrize("this, that, common", test_day_2_2_common_elements_data)
+def test_day_2_2_common_elements(this, that, common):
+    assert common == day_2_2_common_elements(this, that)

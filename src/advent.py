@@ -56,3 +56,18 @@ def day_2_1(box_ids: str) -> int:
         count = day_2_1_count(box_id)
         total_count = total_count[0] + count[0], total_count[1] + count[1]
     return total_count[0] * total_count[1]
+
+
+def day_2_2_common_elements(this: str, that: str) -> str:
+    return ''.join(i for i, j in zip(this, that) if i == j)
+
+
+def day_2_2(box_ids_text: str) -> str:
+    box_ids = box_ids_text.split()
+    matching_id = next(
+        day_2_2_common_elements(x, y)
+        for i, x in enumerate(box_ids[:-1])
+        for y in box_ids[i+1:]
+        if len(day_2_2_common_elements(x, y)) == len(x) - 1
+    )
+    return matching_id
