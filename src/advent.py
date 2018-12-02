@@ -27,8 +27,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from itertools import cycle
-from typing import Set
+from collections import Counter
+from itertools import cycle, accumulate
+from typing import Set, Tuple
 
 
 def day_1_1(adjustments: str) -> int:
@@ -43,3 +44,15 @@ def day_1_2(adjustments: str) -> int:
         if value in frequencies:
             return value
         frequencies.add(value)
+
+
+def day_2_1_count(box_id: str) -> Tuple[int, int]:
+    return int(any(i == 2 for i in Counter(box_id).values())), int(any(i == 3 for i in Counter(box_id).values()))
+
+
+def day_2_1(box_ids: str) -> int:
+    total_count = (0, 0)
+    for box_id in box_ids.split():
+        count = day_2_1_count(box_id)
+        total_count = total_count[0] + count[0], total_count[1] + count[1]
+    return total_count[0] * total_count[1]
