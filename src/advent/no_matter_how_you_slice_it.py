@@ -2,8 +2,8 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
-
-from typing import Iterator
+from itertools import chain
+from typing import Iterator, List, Optional
 
 
 class Rect(object):
@@ -33,7 +33,7 @@ class Rect(object):
         return Rect(max(other.x1, self.x1), max(other.y1, self.y1), min(other.x2, self.x2), min(other.y2, self.y2))
 
     def __eq__(self, other) -> bool:
-        if not isinstance(o, Rect):
+        if not isinstance(other, Rect):
             return False
         return self.x1 == other.x1 and self.y1 == other.y1 and self.x2 == other.x2 and self.y2 == other.y2
 
@@ -66,19 +66,44 @@ def claims(claims_text: str) -> Iterator[Claim]:
         yield Claim(claim_id, int(offset_x), int(offset_y), int(width), int(height))
 
 
-def part1(claims_text: str) -> int:
-    claims_list = list(claims(claims_text.strip()))
-    overlap = [
-        a.overlap(b)
-        for i, a in enumerate(claims_list[:-1])
-        for b in claims_list[i + 1:]
-        if a.overlap(b).width > 0 and a.overlap(b).height > 0
-    ]
-    duplicate_overlap = [
-        a.overlap(b)
-        for i, a in enumerate(overlap[:-1])
-        for b in overlap[i + 1:]
-        if a.overlap(b).width > 0 and a.overlap(b).height > 0
-    ]
+class QNode(object):
+    def __init__(self, bounds: Rect) -> None:
+        super().__init__()
+        self.child: Optional[List[QNode]] = None
+        self.bounds = bounds
 
-    return 0
+    def split(self, x: int, y: int):
+        self.child = [
+            QNode(Rect(self.bounds.x1, self.bounds.y1, x, y)),
+            QNode(Rect(x, self.bounds.y1, self.bounds.x2, y)),
+            QNode(Rect(x, y, self.bounds.x2, self.bounds.y2)),
+            QNode(Rect(self.bounds.x1, y, x, self.bounds.y2)),
+        ]
+
+
+class QTree(object):
+    def __init__(self, width, height) -> None:
+        super().__init__()
+        self.root = QNode(Rect(0, 0, width, height))
+
+    def _qnodes(self, qnode: QNode) -> Iterator[QNode]:
+        if qnode.child:
+            return chain(
+                self._qnodes(qnode.child[0]),
+                self._qnodes(qnode.child[1]),
+                self._qnodes(qnode.child[2]),
+                self._qnodes(qnode.child[3]),
+            )
+        else:
+            yield qnode
+
+    def __iter__(self) -> Iterator[Rect]:
+        for i in self._qnodes(self.root):
+            yield i.bounds
+
+    def insert(self, param: Rect):
+        pass
+
+
+def part1(claims_text: str) -> int:
+    pass
