@@ -5,9 +5,9 @@
 
 from pytest import mark
 
-from advent.no_matter_how_you_slice_it import part1, parse_claims_text, Claim
+from advent.no_matter_how_you_slice_it import part1, part2, parse_claims_text, Claim
 
-test_part1_data = """
+test_data = """
 #1 @ 1,3: 4x4
 #2 @ 3,1: 4x4
 #3 @ 5,5: 2x2
@@ -19,4 +19,8 @@ def test_claims():
 
 
 def test_part1():
-    assert 4 == part1(test_part1_data)
+    assert 4 == part1(test_data)
+
+
+def test_part2():
+    assert "#3" == part2(test_data)

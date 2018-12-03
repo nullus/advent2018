@@ -2,9 +2,8 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
-import functools
-from itertools import chain
-from typing import Iterator, List, Optional, Set, Callable, Tuple
+
+from typing import Iterator, Tuple, Set
 
 
 class Rect(object):
@@ -72,7 +71,7 @@ def parse_claims_text(claims_text: str) -> Iterator[Claim]:
 
     #10 @ 406,555: 11x25
     """
-    for line in claims_text.splitlines():
+    for line in claims_text.strip().splitlines():
         claim_id, _, offset, size = line.split()
         offset_x, offset_y = offset.strip(':').split(',')
         width, height = size.split('x')
@@ -91,13 +90,11 @@ def _generate_x_events(claims: Iterator[Claim]) -> Iterator[Tuple[int, Claim]]:
         yield claim.r.x2, claim
 
 
-def part1(claims_text: str) -> int:
-    overlap = 0
+def _scan_claims(claims: Iterator[Claim]) -> Iterator[Tuple[Set[Claim], Rect]]:
     scan_y = set()
-    y_events = sorted(_generate_y_events(parse_claims_text(claims_text.strip())), key=lambda x: x[0])
+    y_events = sorted(_generate_y_events(claims), key=lambda x: x[0])
     y1 = 0
     for y_event in y_events:
-        print(y_event[0], y_event[1])
         y2, y_claim = y_event
         if y2 > y1:
             scan_x = set()
@@ -106,11 +103,23 @@ def part1(claims_text: str) -> int:
             for x_event in x_events:
                 x2, x_claim = x_event
                 if x2 > x1:
-                    # print(Rect(x1, y1, x2, y2), scan_x)
-                    if len(scan_x) > 1:
-                        overlap += (x2 - x1) * (y2 - y1)
+                    yield scan_x, Rect(x1, y1, x2, y2)
                 x1 = x2
                 scan_x.remove(x_claim) if x_claim in scan_x else scan_x.add(x_claim)
         y1 = y2
         scan_y.remove(y_claim) if y_claim in scan_y else scan_y.add(y_claim)
-    return overlap
+
+
+def part1(claims_text: str) -> int:
+    return sum(rect.area for claims, rect in _scan_claims(parse_claims_text(claims_text)) if len(claims) > 1)
+
+
+def part2(claims_text: str) -> str:
+    claims = list(parse_claims_text(claims_text))
+    valid_claims = set(claim.id for claim in claims) - set(
+        claim.id
+        for match_claims, _ in _scan_claims(claims)
+        for claim in match_claims
+        if len(match_claims) > 1
+    )
+    return ' '.join(valid_claims)
