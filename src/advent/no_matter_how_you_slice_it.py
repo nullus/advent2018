@@ -2,8 +2,9 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
+import functools
 from itertools import chain
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Set, Callable, Tuple
 
 
 class Rect(object):
@@ -37,11 +38,17 @@ class Rect(object):
             return False
         return self.x1 == other.x1 and self.y1 == other.y1 and self.x2 == other.x2 and self.y2 == other.y2
 
+    def __hash__(self) -> int:
+        return hash((self.x1, self.y1, self.x2, self.y2))
+
+    def __repr__(self) -> str:
+        return f"Rect({self.x1}, {self.y1}, {self.x2}, {self.y2})"
+
 
 class Claim(object):
     def __init__(self, id_: str, x: int, y: int, width: int, height: int) -> None:
         super().__init__()
-        self.r = Rect(x, x + width, y, y + height)
+        self.r = Rect(x, y, x + width, y + height)
         self.id = id_
 
     def overlap(self, other) -> Rect:
@@ -52,8 +59,14 @@ class Claim(object):
             return False
         return self.id == o.id and self.r == o.r
 
+    def __hash__(self) -> int:
+        return hash((self.id, hash(self.r)))
 
-def claims(claims_text: str) -> Iterator[Claim]:
+    def __repr__(self) -> str:
+        return f"Claim({self.id}, {self.r})"
+
+
+def parse_claims_text(claims_text: str) -> Iterator[Claim]:
     """
     Crude parsing for records like:
 
@@ -66,44 +79,38 @@ def claims(claims_text: str) -> Iterator[Claim]:
         yield Claim(claim_id, int(offset_x), int(offset_y), int(width), int(height))
 
 
-class QNode(object):
-    def __init__(self, bounds: Rect) -> None:
-        super().__init__()
-        self.child: Optional[List[QNode]] = None
-        self.bounds = bounds
-
-    def split(self, x: int, y: int):
-        self.child = [
-            QNode(Rect(self.bounds.x1, self.bounds.y1, x, y)),
-            QNode(Rect(x, self.bounds.y1, self.bounds.x2, y)),
-            QNode(Rect(x, y, self.bounds.x2, self.bounds.y2)),
-            QNode(Rect(self.bounds.x1, y, x, self.bounds.y2)),
-        ]
+def _generate_y_events(claims: Iterator[Claim]) -> Iterator[Tuple[int, Claim]]:
+    for claim in claims:
+        yield claim.r.y1, claim
+        yield claim.r.y2, claim
 
 
-class QTree(object):
-    def __init__(self, width, height) -> None:
-        super().__init__()
-        self.root = QNode(Rect(0, 0, width, height))
-
-    def _qnodes(self, qnode: QNode) -> Iterator[QNode]:
-        if qnode.child:
-            return chain(
-                self._qnodes(qnode.child[0]),
-                self._qnodes(qnode.child[1]),
-                self._qnodes(qnode.child[2]),
-                self._qnodes(qnode.child[3]),
-            )
-        else:
-            yield qnode
-
-    def __iter__(self) -> Iterator[Rect]:
-        for i in self._qnodes(self.root):
-            yield i.bounds
-
-    def insert(self, param: Rect):
-        pass
+def _generate_x_events(claims: Iterator[Claim]) -> Iterator[Tuple[int, Claim]]:
+    for claim in claims:
+        yield claim.r.x1, claim
+        yield claim.r.x2, claim
 
 
 def part1(claims_text: str) -> int:
-    pass
+    overlap = 0
+    scan_y = set()
+    y_events = sorted(_generate_y_events(parse_claims_text(claims_text.strip())), key=lambda x: x[0])
+    y1 = 0
+    for y_event in y_events:
+        print(y_event[0], y_event[1])
+        y2, y_claim = y_event
+        if y2 > y1:
+            scan_x = set()
+            x_events = sorted(_generate_x_events(iter(scan_y)), key=lambda x: x[0])
+            x1 = 0
+            for x_event in x_events:
+                x2, x_claim = x_event
+                if x2 > x1:
+                    # print(Rect(x1, y1, x2, y2), scan_x)
+                    if len(scan_x) > 1:
+                        overlap += (x2 - x1) * (y2 - y1)
+                x1 = x2
+                scan_x.remove(x_claim) if x_claim in scan_x else scan_x.add(x_claim)
+        y1 = y2
+        scan_y.remove(y_claim) if y_claim in scan_y else scan_y.add(y_claim)
+    return overlap
