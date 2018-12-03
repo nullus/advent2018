@@ -7,30 +7,16 @@ from typing import Iterator, Tuple, Set
 
 
 class Rect(object):
-    def __init__(self, x1: int = 0, y1: int = 0, x2: int = 0, y2: int = 0):
+    def __init__(self, x1: int, y1: int, x2: int, y2: int) -> None:
         super().__init__()
-        self.x1 = x1
-        self.x2 = x2
-        self.y1 = y1
-        self.y2 = y2
-
-    @property
-    def width(self):
-        return self.x2 - self.x1
-
-    @property
-    def height(self):
-        return self.y2 - self.y1
+        self.x1 = min(x1, x2)
+        self.y1 = min(y1, y2)
+        self.x2 = max(x1, x2)
+        self.y2 = max(y1, y2)
 
     @property
     def area(self):
-        return self.width * self.height
-
-    def contains(self, x: int, y: int) -> bool:
-        return self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2
-
-    def overlap(self, other: 'Rect') -> 'Rect':
-        return Rect(max(other.x1, self.x1), max(other.y1, self.y1), min(other.x2, self.x2), min(other.y2, self.y2))
+        return (self.x2 - self.x1) * (self.y2 - self.y1)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Rect):
@@ -49,9 +35,6 @@ class Claim(object):
         super().__init__()
         self.r = Rect(x, y, x + width, y + height)
         self.id = id_
-
-    def overlap(self, other) -> Rect:
-        return self.r.overlap(other.r)
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, Claim):
