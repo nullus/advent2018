@@ -3,8 +3,6 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
-from pytest import mark
-
 from advent.no_matter_how_you_slice_it import part1, part2, parse_claims_text, Claim
 
 test_data = """
