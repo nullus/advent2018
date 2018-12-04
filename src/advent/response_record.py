@@ -6,41 +6,35 @@
 from collections import defaultdict
 from itertools import accumulate
 from re import findall
-from typing import Optional, List, Dict, Tuple, Iterator
+from typing import List, Dict, Tuple, Iterator
 
 
-def part1(response_record_text: str) -> int:
-    # Parsing input
-    response_record = sorted(response_record_text.strip().splitlines())
-
+def _guard_sleep_journal(response_record_text: str) -> Tuple[Dict[int, int], Dict[int, List[Tuple[int, int]]]]:
+    guard_total_sleep: Dict[int, int] = defaultdict(lambda: 0)
+    guard_sleep_times: Dict[int, List[Tuple[int, int]]] = defaultdict(list)
     guard: int = None
-    awake: Optional[bool] = True
 
-    guard_total_sleep: Dict[int, int] = {}
-    guard_sleep_times: Dict[int, List[Tuple[int, int]]] = {}
-
-    for record in response_record:
+    for record in sorted(response_record_text.strip().splitlines()):
         minutes: int = int(record[15:17])
         action: str = record[19:]
 
         if action.startswith('Guard'):
-            assert awake
             guard = int(action[7:-13])
-            if guard not in guard_total_sleep:
-                guard_total_sleep[guard] = 0
-                guard_sleep_times[guard] = []
         elif action.startswith('falls asleep'):
-            assert guard is not None and awake
             guard_sleep_times[guard].append((minutes, 1))
-            awake = False
         elif action.startswith('wakes up'):
-            assert guard is not None and not awake
             guard_sleep_times[guard].append((minutes, -1))
             (m1, _), (m2, _) = guard_sleep_times[guard][-2:]
             guard_total_sleep[guard] += m2 - m1
-            awake = True
         else:
             raise RuntimeError()
+
+    return guard_total_sleep, guard_sleep_times
+
+
+def part1(response_record_text: str) -> int:
+
+    guard_total_sleep, guard_sleep_times = _guard_sleep_journal(response_record_text)
 
     sleepy_guard = sorted(((v, k) for k, v in guard_total_sleep.items()), key=lambda x: x[0], reverse=True)[0][1]
 
@@ -52,7 +46,6 @@ def part1(response_record_text: str) -> int:
     minutey = 0
     for m2, depth in reversed(list(cumulative_sleep)):
         if m2 < m1 and depth > deepest:
-            print(m2, depth)
             deepest = depth
             minutey = m2
         m1 = m2
@@ -61,37 +54,8 @@ def part1(response_record_text: str) -> int:
 
 
 def part2(response_record_text: str) -> int:
-    # Parsing input
-    response_record = sorted(response_record_text.strip().splitlines())
 
-    guard: int = None
-    awake: Optional[bool] = True
-
-    guard_total_sleep: Dict[int, int] = {}
-    guard_sleep_times: Dict[int, List[Tuple[int, int]]] = {}
-
-    for record in response_record:
-        minutes: int = int(record[15:17])
-        action: str = record[19:]
-
-        if action.startswith('Guard'):
-            assert awake
-            guard = int(action[7:-13])
-            if guard not in guard_total_sleep:
-                guard_total_sleep[guard] = 0
-                guard_sleep_times[guard] = []
-        elif action.startswith('falls asleep'):
-            assert guard is not None and awake
-            guard_sleep_times[guard].append((minutes, 1))
-            awake = False
-        elif action.startswith('wakes up'):
-            assert guard is not None and not awake
-            guard_sleep_times[guard].append((minutes, -1))
-            (m1, _), (m2, _) = guard_sleep_times[guard][-2:]
-            guard_total_sleep[guard] += m2 - m1
-            awake = True
-        else:
-            raise RuntimeError()
+    guard_total_sleep, guard_sleep_times = _guard_sleep_journal(response_record_text)
 
     longest_sleep: int = 0
     guard_id: int = 0
