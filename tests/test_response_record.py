@@ -3,7 +3,7 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
-from advent.response_record import part1, part2
+from advent.response_record import part1, part2, impl1
 
 test_response_record_data = """
 [1518-11-01 00:00] Guard #10 begins shift
@@ -32,3 +32,7 @@ def test_part1():
 
 def test_part2():
     assert 4455 == part2(test_response_record_data)
+
+
+def test_impl1():
+    assert [240, 4455] == list(impl1(test_response_record_data))

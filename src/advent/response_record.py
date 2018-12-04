@@ -2,8 +2,11 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
+
+from collections import defaultdict
 from itertools import accumulate
-from typing import Optional, List, Dict, Tuple
+from re import findall
+from typing import Optional, List, Dict, Tuple, Iterator
 
 
 def part1(response_record_text: str) -> int:
@@ -41,7 +44,8 @@ def part1(response_record_text: str) -> int:
 
     sleepy_guard = sorted(((v, k) for k, v in guard_total_sleep.items()), key=lambda x: x[0], reverse=True)[0][1]
 
-    cumulative_sleep = accumulate(sorted(guard_sleep_times[sleepy_guard], key=lambda x: x[0]), func=lambda a, b: (b[0], a[1] + b[1]))
+    cumulative_sleep = accumulate(sorted(guard_sleep_times[sleepy_guard], key=lambda x: x[0]),
+                                  func=lambda a, b: (b[0], a[1] + b[1]))
 
     m1 = 60
     deepest = 0
@@ -114,3 +118,35 @@ def part2(response_record_text: str) -> int:
             sleeping_minute = minutey
 
     return guard_id * sleeping_minute
+
+
+def impl1(response_record_text: str) -> Iterator[int]:
+    """
+    Copyright (c) 2018 Peter Tseng (https://github.com/petertseng). All rights reserved.
+    Licensed under Apache 2.0 License.
+    See https://github.com/petertseng/adventofcode-rb-2018/blob/master/LICENSE for full license.
+
+    Reimplementation of https://github.com/petertseng/adventofcode-rb-2018/blob/master/04_repose_record.rb in Python
+
+    I really liked his solution, but I needed to improve my knowledge of Ruby to comprehend it. This seemed like a good
+    way to accomplish that.
+    """
+    guards = defaultdict(lambda: defaultdict(lambda: 0))
+
+    guard = None
+    started_sleeping = None
+
+    for line in sorted(response_record_text.strip().splitlines()):
+        last_number = int(findall(r'\d+', line)[-1])
+        if line.endswith('begins shift'):
+            guard = last_number
+        elif line.endswith('falls asleep'):
+            started_sleeping = last_number
+        elif line.endswith('wakes up'):
+            woke_up = last_number
+            for min_ in range(started_sleeping, woke_up):
+                guards[guard][min_] += 1
+
+    for f in (sum, max):
+        id_, minutes = max(guards.items(), key=lambda v: f(v[1].values()))
+        yield id_ * max(minutes, key=lambda k: minutes[k])
