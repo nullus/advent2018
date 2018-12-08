@@ -74,13 +74,13 @@ def _generate_x_events(claims: Iterator[Claim]) -> Iterator[Tuple[int, Claim]]:
 
 
 def _scan_claims(claims: Iterator[Claim]) -> Iterator[Tuple[Set[Claim], Rect]]:
-    scan_y = set()
+    scan_y: Set[Claim] = set()
     y_events = sorted(_generate_y_events(claims), key=lambda x: x[0])
     y1 = 0
     for y_event in y_events:
         y2, y_claim = y_event
         if y2 > y1:
-            scan_x = set()
+            scan_x: Set[Claim] = set()
             x_events = sorted(_generate_x_events(iter(scan_y)), key=lambda x: x[0])
             x1 = 0
             for x_event in x_events:
@@ -88,9 +88,15 @@ def _scan_claims(claims: Iterator[Claim]) -> Iterator[Tuple[Set[Claim], Rect]]:
                 if x2 > x1:
                     yield scan_x, Rect(x1, y1, x2, y2)
                 x1 = x2
-                scan_x.remove(x_claim) if x_claim in scan_x else scan_x.add(x_claim)
+                if x_claim in scan_x:
+                    scan_x.remove(x_claim)
+                else:
+                    scan_x.add(x_claim)
         y1 = y2
-        scan_y.remove(y_claim) if y_claim in scan_y else scan_y.add(y_claim)
+        if y_claim in scan_y:
+            scan_y.remove(y_claim)
+        else:
+            scan_y.add(y_claim)
 
 
 def part1(claims_text: str) -> int:
@@ -101,7 +107,7 @@ def part2(claims_text: str) -> str:
     claims = list(parse_claims_text(claims_text))
     valid_claims = set(claim.id for claim in claims) - set(
         claim.id
-        for match_claims, _ in _scan_claims(claims)
+        for match_claims, _ in _scan_claims(iter(claims))
         for claim in match_claims
         if len(match_claims) > 1
     )
