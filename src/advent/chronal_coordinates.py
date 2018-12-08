@@ -29,24 +29,20 @@ def part1(input_text: str) -> int:
     inside_points = [i for i, point in enumerate(points) if inside(point, bound_low, bound_high)]
 
     point_area = defaultdict(lambda: 0)
-    point_area_2 = defaultdict(lambda: 0)
 
     for y in range(bound_low[1], bound_high[1] + 1):
         for x in range(bound_low[0], bound_high[0] + 1):
             distances = sorted([(manhattan((x, y), point), i) for i, point in enumerate(points)], key=lambda k: k[0])
-            if distances[0][0] < distances[1][0] and distances[0][1] in inside_points:
-                point_area[distances[0][1]] += 1
+            # Check whether the point is inside the bounds, anything that isn't will be infinite
+            if inside((x, y), bound_low, bound_high):
+                if distances[0][0] < distances[1][0] and distances[0][1] in inside_points:
+                    point_area[distances[0][1]] += 1
+            else:
+                if distances[0][1] in inside_points:
+                    del inside_points[inside_points.index(distances[0][1])]
+                    point_area[distances[0][1]] = 0
 
-    # TODO: This is terrible (please fix)
-    for y in range(bound_low[1] - 1, bound_high[1] + 2):
-        for x in range(bound_low[0] - 1, bound_high[0] + 2):
-            distances = sorted([(manhattan((x, y), point), i) for i, point in enumerate(points)], key=lambda k: k[0])
-            if distances[0][0] < distances[1][0] and distances[0][1] in inside_points:
-                point_area_2[distances[0][1]] += 1
-
-    point_area_3 = dict((k, v) for k, v in point_area.items() if v == point_area_2[k])
-
-    return max(point_area_3.items(), key=lambda k: k[1])[1]
+    return max(point_area.items(), key=lambda k: k[1])[1]
 
 
 def part2(input_text: str, threshold: int) -> int:
