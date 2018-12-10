@@ -23,5 +23,5 @@ def test_part1(args, score):
 
 
 @mark.parametrize("args, score", test_data)
-def test_part1(args, score):
+def test_part2(args, score):
     assert score == part2(*args)
