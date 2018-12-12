@@ -2,8 +2,10 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
-from collections import defaultdict
-from typing import List, Dict, Tuple
+
+from collections import defaultdict, deque
+from itertools import chain
+from typing import List, Dict, Tuple, Iterator
 
 
 def _parser(growth_rules: str) -> Tuple[List[bool], Dict[Tuple[bool, ...], bool]]:
@@ -17,17 +19,18 @@ def _parser(growth_rules: str) -> Tuple[List[bool], Dict[Tuple[bool, ...], bool]
     return initial_state, rules
 
 
-def _next_state(state: List[bool], rules: Dict[Tuple[bool, ...], bool]) -> List[bool]:
-    next_state = [
-        rules[tuple([False] * (4 - i) + state[:1 + i])]
-        for i in range(0, 4)
-    ] + [
-        rules[tuple(state[i:i + 5])]
-        for i in range(0, len(state) - 4)
-    ] + [
-        rules[tuple(state[-4 + i:] + [False] * (i + 1))]
-        for i in range(0, 4)
-    ]
+def _next_state(state: List[bool], rules: Dict[Tuple[bool, ...], bool], offset: int = 0) -> List[bool]:
+    # Use fixed size deque and chain to window over state
+    def window_state(window_size: int = 5):
+        padding: List[bool] = [False] * (window_size - 1)
+        state_padded: Iterator[bool] = chain(state, padding)
+        window: deque[bool] = deque(padding, maxlen=window_size)
+        for elem in state_padded:
+            window.append(elem)
+            yield tuple(window)
+
+    next_state: List[bool] = [rules[i] for i in window_state(5)]
+
     return next_state
 
 
