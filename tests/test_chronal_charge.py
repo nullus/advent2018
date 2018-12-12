@@ -41,6 +41,7 @@ test_part2_data = [
 ]
 
 
+@mark.skip
 @mark.parametrize("serial, coordinates", test_part2_data)
 def test_part2(serial, coordinates):
     assert coordinates == part2(serial)
