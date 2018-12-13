@@ -4,7 +4,7 @@
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
 from itertools import cycle
-from typing import Tuple, List, Set
+from typing import Tuple, List, Set, Iterator
 
 
 class Cart(object):
@@ -12,9 +12,9 @@ class Cart(object):
     GO_STRAIGHT: int = 0
     TURN_RIGHT: int = 1
 
-    # Clockwise turning
+    # Clockwise turning to match turn direction above
     DIRECTIONS: List[str] = ['^', '>', 'v', '<']
-    VECTOR: List[Tuple[int, int]] = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+    VELOCITY: List[Tuple[int, int]] = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 
     def __init__(self, position: Tuple[int, int], direction: str) -> None:
         super().__init__()
@@ -22,29 +22,22 @@ class Cart(object):
         self._direction: int = Cart.DIRECTIONS.index(direction)
         self._turn = cycle([Cart.TURN_LEFT, Cart.GO_STRAIGHT, Cart.TURN_RIGHT])
 
-    def turn(self) -> None:
-        next_turn = next(self._turn)
-        self._direction = (self._direction + next_turn) % len(Cart.DIRECTIONS)
-
-    def turn_corner(self, corner: str) -> None:
-        self._direction = {
-            '/':  {0: 1, 1: 0, 2: 3, 3: 2},
-            '\\': {0: 3, 1: 2, 2: 1, 3: 0},
-        }[corner][self._direction]
-
     def move(self) -> None:
         self.position = (
-            self.position[0] + Cart.VECTOR[self._direction][0],
-            self.position[1] + Cart.VECTOR[self._direction][1]
+            self.position[0] + Cart.VELOCITY[self._direction][0],
+            self.position[1] + Cart.VELOCITY[self._direction][1]
         )
 
     def act(self, tile: str) -> None:
         if tile in ['-', '|']:
             pass
         elif tile in ['/', '\\']:
-            self.turn_corner(tile)
+            self._direction = {
+                '/':  {0: 1, 1: 0, 2: 3, 3: 2},
+                '\\': {0: 3, 1: 2, 2: 1, 3: 0},
+            }[tile][self._direction]
         elif tile == '+':
-            self.turn()
+            self._direction = (self._direction + next(self._turn)) % len(Cart.DIRECTIONS)
         else:
             raise ValueError(f"We're in a bad place! Invalid tile (f{tile})")
 
@@ -72,16 +65,16 @@ class Cart(object):
         return hash(self.position)
 
 
-def _parser(track_text: str) -> Tuple[List[str], List[Cart]]:
+def _parser(track_text: str) -> Tuple[List[str], Set[Cart]]:
     track: List[str] = []
-    carts: List[Cart] = []
+    carts: Set[Cart] = set()
 
     # "Extract" carts from track
     for y, line in enumerate(track_text.splitlines()):
         row = []
         for x, tile in enumerate(line):
             if tile in ['<', '>', '^', 'v']:
-                carts.append(Cart((x, y), tile))
+                carts.add(Cart((x, y), tile))
                 row.append({'<': '-', '>': '-', '^': '|', 'v': '|'}[tile])
             else:
                 row.append(tile)
@@ -90,36 +83,36 @@ def _parser(track_text: str) -> Tuple[List[str], List[Cart]]:
     return track, carts
 
 
+def _collisions(track: List[str], carts: Set[Cart]) -> Iterator[Tuple[int, int]]:
+    while len(carts) > 1:
+        for cart in sorted(carts):
+            if cart not in carts:
+                # Already collided
+                continue
+            # Remove to mutating the cart and breaking the set invariant (feels dirty)
+            carts.remove(cart)
+            cart.move()
+            cart.act(track[cart.position[1]][cart.position[0]])
+            # Test for collisions
+            if cart in carts:
+                # Collided
+                carts.remove(cart)
+                yield cart.position
+            else:
+                # Add back to set
+                carts.add(cart)
+
+    # This will raise if the set is empty
+    yield carts.pop().position
+
+
 def part1(track_text: str) -> Tuple[int, int]:
     track, carts = _parser(track_text)
 
-    while True:
-        positions: Set[Cart] = set(i for i in carts)
-        for cart in sorted(carts):
-            positions.remove(cart)
-            cart.move()
-            cart.act(track[cart.position[1]][cart.position[0]])
-            if cart in positions:
-                return cart.position
-            positions.add(cart)
+    return next(_collisions(track, carts))
 
 
 def part2(track_text: str) -> Tuple[int, int]:
     track, carts = _parser(track_text)
 
-    while len(carts) > 1:
-        positions: Set[Cart] = set(carts)
-        for cart in sorted(carts):
-            if cart not in positions:
-                continue
-            positions.remove(cart)
-            cart.move()
-            cart.act(track[cart.position[1]][cart.position[0]])
-            # Test for collision
-            if cart in positions:
-                positions.remove(cart)
-            else:
-                positions.add(cart)
-        carts = list(positions)
-
-    return carts[0].position
+    return list(_collisions(track, carts))[-1]

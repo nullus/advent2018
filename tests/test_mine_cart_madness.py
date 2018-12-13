@@ -5,15 +5,16 @@
 
 from pytest import mark
 
+from advent.input import text
 from advent.mine_cart_madness import part1, Cart, part2
 
-test_data = '''
-/->-\\        
-|   |  /----\\
-| /-+--+-\\  |
+test_data = r'''
+/->-\        
+|   |  /----\
+| /-+--+-\  |
 | | |  | v  |
-\\-+-/  \\-+--/
-  \\------/   
+\-+-/  \-+--/
+  \------/   
 '''.strip()
 
 
@@ -23,11 +24,11 @@ def test_part1():
 
 def test_cart_turn():
     cart = Cart((0, 0), '<')
-    cart.turn()
+    cart.act('+')
     assert 'v' == cart.direction
-    cart.turn()
+    cart.act('+')
     assert 'v' == cart.direction
-    cart.turn()
+    cart.act('+')
     assert '<' == cart.direction
 
 
@@ -46,15 +47,15 @@ def test_cart_order(high_pos, low_pos):
     assert cart_low < cart_high
 
 
-test_collision_order = '''
-/--->--<----\\
+test_collision_order = r'''
+/--->--<----\
 |           |
 v           v
 |           |
 |           |
 ^           ^
 |           |
-\\->--<------/
+\->--<------/
 '''.strip()
 
 
@@ -62,16 +63,24 @@ def test_part1_collision_order():
     assert (6, 0) == part1(test_collision_order)
 
 
-test_data2 = '''
-/>-<\\  
+test_data2 = r'''
+/>-<\ 
 |   |  
-| /<+-\\
+| /<+-\
 | | | v
-\\>+</ |
+\>+</ |
   |   ^
-  \\<->/
+  \<->/
 '''.strip()
 
 
 def test_part2():
     assert (6, 4) == part2(test_data2)
+
+
+def test_part1_with_puzzle_input():
+    assert (26, 92) == part1(text('mine_cart_madness'))
+
+
+def test_part2_with_puzzle_input():
+    assert (86, 18) == part2(text('mine_cart_madness'))
