@@ -3,35 +3,54 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
-from collections import deque
+from itertools import takewhile, dropwhile
 
-from typing import List, Tuple
+from typing import List, Iterator, Tuple
+
+
+def _gen_score_sequence(initial_scores: List[int]) -> Iterator[int]:
+    scores: List[int] = initial_scores.copy()
+    len_scores: int = len(scores)
+    i, j = 0, 1
+
+    for x in scores:
+        yield x
+
+    while True:
+        score = scores[i] + scores[j]
+        if score > 9:
+            yield 1
+            yield score % 10
+            scores += [1, score % 10]
+            len_scores += 2
+        else:
+            yield score
+            scores.append(score)
+            len_scores += 1
+        i, j = (scores[i] + i + 1) % len_scores, (scores[j] + j + 1) % len_scores
 
 
 def part1(initial_scores: List[int], attempted_recipes: int) -> str:
-    scores: List[int] = initial_scores.copy()
-    elf_recipe: List[int] = list(range(len(initial_scores)))
-
-    while len(scores) < attempted_recipes + 10:
-        scores += (int(i) for i in str(sum(scores[j] for j in elf_recipe)))
-        elf_recipe = [(i + scores[i] + 1) % len(scores) for i in elf_recipe]
-
-    return ''.join(str(i) for i in scores[attempted_recipes:attempted_recipes + 10])
+    sequence: Iterator[Tuple[int, int]] = takewhile(
+        lambda n: n[0] < attempted_recipes + 10,
+        dropwhile(
+            lambda n: n[0] < attempted_recipes,
+            enumerate(_gen_score_sequence(initial_scores))
+        )
+    )
+    return ''.join(str(i[1]) for i in sequence)
 
 
 def part2(initial_scores: List[int], match_sequence_str: str) -> int:
-    scores: List[int] = initial_scores.copy()
-    elf_recipe: Tuple[int, int] = (0, 1)
-    match_sequence: deque[int] = deque(int(i) for i in match_sequence_str)
-    sequence: deque[int] = deque(scores, maxlen=len(match_sequence_str))
+    match_sequence: List[int] = [int(i) for i in match_sequence_str]
+    matched: int = 0
 
-    while True:
-        for i, digit in enumerate(int(i) for i in str(scores[elf_recipe[0]] + scores[elf_recipe[1]])):
-            sequence.append(digit)
-            scores += [digit]
-            if match_sequence == sequence:
-                return len(scores) - len(match_sequence_str)
-        elf_recipe = (
-            (scores[elf_recipe[0]] + elf_recipe[0] + 1) % len(scores),
-            (scores[elf_recipe[1]] + elf_recipe[1] + 1) % len(scores)
-        )
+    for i, score in enumerate(_gen_score_sequence(initial_scores)):
+        if score == match_sequence[matched]:
+            matched += 1
+            if matched >= len(match_sequence_str):
+                return i - len(match_sequence_str) + 1
+        elif score == match_sequence[0]:
+            matched = 1
+        else:
+            matched = 0
