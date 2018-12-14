@@ -17,17 +17,23 @@ def _gen_score_sequence(initial_scores: List[int]) -> Iterator[int]:
         yield x
 
     while True:
-        score = scores[i] + scores[j]
-        if score > 9:
-            yield 1
-            yield score % 10
-            scores += [1, score % 10]
-            len_scores += 2
-        else:
-            yield score
-            scores.append(score)
-            len_scores += 1
-        i, j = (scores[i] + i + 1) % len_scores, (scores[j] + j + 1) % len_scores
+        try:
+            a, b = scores[i], scores[j]
+            score = a + b
+            if score > 9:
+                score -= 10
+                yield 1
+                yield score
+                scores += [1, score]
+                len_scores += 2
+            else:
+                yield score
+                scores.append(score)
+                len_scores += 1
+            i, j = (a + i + 1), (b + j + 1)
+        except IndexError:
+            i %= len_scores
+            j %= len_scores
 
 
 def part1(initial_scores: List[int], attempted_recipes: int) -> str:
