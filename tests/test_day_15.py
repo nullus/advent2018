@@ -5,6 +5,7 @@
 from pytest import mark
 
 from advent.day_15 import part1, Battle
+from advent.input import text
 
 test_battle1 = """
 #######
@@ -66,3 +67,6 @@ test_data_battle1_space_is_empty = [
 def test_battle_space_is_empty(x, y, is_empty):
     assert is_empty == Battle(test_battle1).is_empty(x, y)
 
+
+def test_part1_with_puzzle_input():
+    assert 245280 == part1(text('day_15'))
