@@ -4,7 +4,7 @@
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 from pytest import mark
 
-from advent.day_15 import part1, Battle, Vector, part2
+from advent.beverage_bandits import part1, Battle, Vector, part2
 from advent.input import text
 
 test_battle1 = """
@@ -69,9 +69,9 @@ def test_battle_space_is_empty(x, y, is_empty):
 
 
 def test_part1_with_puzzle_input():
-    assert 245280 == part1(text('day_15'))
+    assert 245280 == part1(text('beverage_bandits'))
 
 
 def test_part2_with_puzzle_input():
-    assert 74984 == part2(text('day_15'))
+    assert 74984 == part2(text('beverage_bandits'))
 
