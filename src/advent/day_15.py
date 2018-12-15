@@ -2,16 +2,18 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
-from collections import namedtuple, deque
+
+from collections import deque
+from functools import lru_cache
 
 
 class Actor(object):
 
-    def __init__(self, hit_points, allegiance, x, y) -> None:
+    def __init__(self, hit_points, allegiance, x, y, attack_power=3) -> None:
         super().__init__()
         self.hit_points = hit_points
         self.allegiance = allegiance
-        self.attack_power = 3
+        self.attack_power = attack_power
         self.x = x
         self.y = y
 
@@ -49,15 +51,17 @@ class Actor(object):
 
 
 class Battle(object):
-    def __init__(self, battle_map_text: str) -> None:
+    def __init__(self, battle_map_text: str, elf_attack_power=3) -> None:
         super().__init__()
         self.round = 0
         self.actors = {
-            (x, y): Actor(200, tile, x, y)
+            (x, y): Actor(200, tile, x, y, elf_attack_power if tile == 'E' else 3)
             for y, row in enumerate(battle_map_text.strip().splitlines())
             for x, tile in enumerate(row)
             if tile in ['G', 'E']
         }
+        # A dict for out of work actors :P
+        self.stuck = set()
         self.map = [
             ''.join({
                 'G': '.',
@@ -87,6 +91,7 @@ class Battle(object):
         return (x, y) not in self.actors and self.map[y][x] != '#'
 
     def simulate(self):
+        # @lru_cache(128)
         def _nearest_movement_direction(point, targets, invalid_points=None):
             """Flood fill to find nearest target, search breadth first"""
 
@@ -102,10 +107,11 @@ class Battle(object):
                 for dir_ in directions
                 if (point[0] + dir_[0], point[1] + dir_[1]) not in seen_points
             )
+            seen_points.update((point[0] + dir_[0], point[1] + dir_[1]) for dir_ in directions)
 
             while search_queue:
                 search_point, initial_dir, distance = search_queue.popleft()
-                seen_points.add(search_point)
+                # seen_points.add(search_point)
                 if search_point in targets:
                     print(f"found")
                     return initial_dir
@@ -114,9 +120,9 @@ class Battle(object):
                     for dir_ in directions
                     if (search_point[0] + dir_[0], search_point[1] + dir_[1]) not in seen_points
                 )
+                seen_points.update((search_point[0] + dir_[0], search_point[1] + dir_[1]) for dir_ in directions)
 
             return None
-            #raise RuntimeError("nothing found")
 
         while True:
             print(self.round)
@@ -124,6 +130,7 @@ class Battle(object):
             print(self.actors)
             for this in sorted(self.actors.values()):
                 if not this.alive:
+                    # Ignore dead people
                     continue
 
                 # find enemies
@@ -138,19 +145,33 @@ class Battle(object):
                     this.attack(in_range[0])
                     if not in_range[0].alive:
                         print(f"{in_range[0]} dies")
+                        if in_range[0].allegiance == 'E':
+                            print("Oh noes! it was a elf")
+                            return
                         del self.actors[(in_range[0].x, in_range[0].y)]
+                        # Unstick actors
+                        self.stuck = set()
+
                 # otherwise move
                 else:
                     # Of all enemies, what spaces do we want to occupy?
-                    movement_target = set([space for enemy in enemies for space in enemy.adjacent if self.is_empty(*space)])
-                    if movement_target:
-                        direction = _nearest_movement_direction((this.x, this.y), movement_target, self.map_blocked_points.union(self.actors.keys()))
+                    movement_target = frozenset([space for enemy in enemies for space in enemy.adjacent if self.is_empty(*space)])
+                    if (this.x, this.y) not in self.stuck and movement_target:
+                        print(f"{this} finding a place to move")
+                        direction = _nearest_movement_direction((this.x, this.y), movement_target, frozenset(self.map_blocked_points.union(self.actors.keys())))
                         if direction:
                             print(f"{this} moves {direction}")
                             del self.actors[(this.x, this.y)]
                             this.x += direction[0]
                             this.y += direction[1]
                             self.actors[(this.x, this.y)] = this
+                            # Unstick actors
+                            self.stuck = set()
+                        else:
+                            # A failure to move means we probably can't move until someone dies/moves: flag it
+                            print(f"{this} is stuck")
+                            self.stuck.add((this.x, this.y))
+
                     # any in range? attack
                     in_range = sorted((other for other in enemies if this.in_range(other)), key=lambda k: k.hit_points)
                     if in_range:
@@ -158,10 +179,10 @@ class Battle(object):
                         if not in_range[0].alive:
                             print(f"{in_range[0]} dies")
                             del self.actors[(in_range[0].x, in_range[0].y)]
+                            # Unstick actors
+                            self.stuck = set()
 
             self.round += 1
-
-        #print(self.round, sum(actor.hit_points for actor in self.actors.values()))
 
 
 def part1(battle_map_text: str) -> int:
@@ -170,3 +191,12 @@ def part1(battle_map_text: str) -> int:
     print(battle.round, sum(actor.hit_points for actor in battle.actors.values()))
 
     return battle.round * sum(actor.hit_points for actor in battle.actors.values())
+
+
+def part2(battle_map_text: str, elf_attack_power: int) -> int:
+    battle = Battle(battle_map_text, elf_attack_power)
+    battle.simulate()
+    print(battle.round, sum(actor.hit_points for actor in battle.actors.values()))
+
+    return battle.round * sum(actor.hit_points for actor in battle.actors.values())
+
