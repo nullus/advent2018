@@ -5,12 +5,12 @@
 
 from collections import defaultdict, deque
 from itertools import chain, count
-from typing import List, Dict, Tuple, Iterator
+from typing import List, Dict, Tuple, Iterator, Deque
 
 
 def _parser(growth_rules: str) -> Tuple[List[bool], Dict[Tuple[bool, ...], bool]]:
     initial_state: List[bool] = []
-    rules: Dict[Tuple[bool, ...]] = defaultdict(lambda: False)
+    rules: Dict[Tuple[bool, ...], bool] = defaultdict(lambda: False)
     for i, line in enumerate(growth_rules.splitlines()):
         if i == 0:
             initial_state = [i == '#' for i in line[15:]]
@@ -24,16 +24,15 @@ def _next_state(state: List[bool], rules: Dict[Tuple[bool, ...], bool], offset: 
     def window_state(window_size: int = 5):
         padding: List[bool] = [False] * (window_size - 1)
         state_padded: Iterator[bool] = chain(state, padding)
-        window: deque[bool] = deque(padding, maxlen=window_size)
+        window: Deque[bool] = deque(padding, maxlen=window_size)
         for elem in state_padded:
             window.append(elem)
             yield tuple(window)
 
     next_state: List[bool] = [rules[i] for i in window_state(5)]
     first_true: int = next_state.index(True)
-    last_true: int = next(1 - i for i in count(1) if next_state[-i])
 
-    return next_state[first_true:last_true], offset - 2 + first_true
+    return next_state[first_true:next(1 - i for i in count(1) if next_state[-i])], offset - 2 + first_true
 
 
 def _print_state(state: List[bool]):
