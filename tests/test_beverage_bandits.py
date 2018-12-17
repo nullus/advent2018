@@ -72,6 +72,7 @@ def test_part1_with_puzzle_input():
     assert 245280 == part1(text('beverage_bandits'))
 
 
+@mark.slow
 def test_part2_with_puzzle_input():
     assert 74984 == part2(text('beverage_bandits'))
 
