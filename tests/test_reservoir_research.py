@@ -3,7 +3,8 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
-from advent.reservoir_research import generate_map, part1
+from advent.input import text
+from advent.reservoir_research import generate_map, part1, part2
 
 test_data = r'''
 x=495, y=2..7
@@ -20,7 +21,6 @@ y=13, x=498..504
 # test_spring_location = (500, 0)
 
 test_map_output = r'''
-......+.......
 ............#.
 .#..#.......#.
 .#..#..#......
@@ -43,8 +43,20 @@ test_map_output_array = [
 
 
 def test_map():
-    assert ((494, 0), test_map_output_array) == generate_map(test_data)
+    assert ((494, 1), test_map_output_array) == generate_map(test_data)
 
 
 def test_part1():
     assert 57 == part1(test_data)
+
+
+def test_part1_with_puzzle_input():
+    assert 32552 == part1(text('reservoir_research'))
+
+
+def test_part2():
+    assert 29 == part2(test_data)
+
+
+def test_part2_with_puzzle_input():
+    assert 26405 == part2(text('reservoir_research'))
