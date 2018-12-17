@@ -3,7 +3,7 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
-from advent.day_16 import part1, part2
+from advent.chronal_classification import part1, part2
 from advent.input import text
 
 test_data = r'''
@@ -21,4 +21,4 @@ def test_part1():
 
 
 def test_part2_with_puzzle_input():
-    assert 594 == part2(text('day_16'), text('day_16_program'))
+    assert 594 == part2(text('chronal_classification'), text('chronal_classification_program'))
