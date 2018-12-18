@@ -3,6 +3,8 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
+from pytest import mark
+
 from advent.input import text
 from advent.reservoir_research import generate_map, part1, part2
 
@@ -50,6 +52,7 @@ def test_part1():
     assert 57 == part1(test_data)
 
 
+@mark.slow
 def test_part1_with_puzzle_input():
     assert 32552 == part1(text('reservoir_research'))
 
@@ -58,5 +61,6 @@ def test_part2():
     assert 29 == part2(test_data)
 
 
+@mark.slow
 def test_part2_with_puzzle_input():
     assert 26405 == part2(text('reservoir_research'))
