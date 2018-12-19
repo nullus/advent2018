@@ -13,7 +13,7 @@ def _exec(reg, loc, res):
     return next_reg
 
 
-_opcodes = {
+opcodes = {
     'addr': lambda reg, a, b, c: _exec(reg, c, reg[a] + reg[b]),
     'addi': lambda reg, a, b, c: _exec(reg, c, reg[a] + b),
     'mulr': lambda reg, a, b, c: _exec(reg, c, reg[a] * reg[b]),
@@ -44,7 +44,7 @@ def part1(sample_text: str) -> Any:
         elif line.startswith('After:  '):
             exp = [int(i) for i in line[8:].strip('[]').split(', ')]
             # Test instruction
-            if [run(reg, *ins[1:]) == exp for run in _opcodes.values()].count(True) >= 3:
+            if [run(reg, *ins[1:]) == exp for run in opcodes.values()].count(True) >= 3:
                 three_options_or_more += 1
         else:
             ins = [int(i) for i in line.split()]
@@ -54,7 +54,7 @@ def part1(sample_text: str) -> Any:
 
 def part2(sample_text: str, program_text: str) -> int:
     reg, exp, ins = None, None, None
-    opcode_candidate: Dict[int, Set[str]] = defaultdict(lambda: set(_opcodes.keys()))
+    opcode_candidate: Dict[int, Set[str]] = defaultdict(lambda: set(opcodes.keys()))
     opcode_mapping: Dict[int, str] = defaultdict(lambda: '')
 
     # Skip blank lines
@@ -65,7 +65,7 @@ def part2(sample_text: str, program_text: str) -> int:
             exp = [int(i) for i in line[8:].strip('[]').split(', ')]
             # Test instruction
             opcode_candidate[ins[0]].intersection_update(
-                [opcode for opcode, run in _opcodes.items() if run(reg, *ins[1:]) == exp]
+                [opcode for opcode, run in opcodes.items() if run(reg, *ins[1:]) == exp]
             )
         else:
             ins = [int(i) for i in line.split()]
@@ -80,6 +80,6 @@ def part2(sample_text: str, program_text: str) -> int:
     reg = [0, 0, 0, 0]
     for line in program_text.splitlines():
         ins = [int(i) for i in line.split()]
-        reg = _opcodes[opcode_mapping[ins[0]]](reg, *ins[1:])
+        reg = opcodes[opcode_mapping[ins[0]]](reg, *ins[1:])
 
     return reg[0]
