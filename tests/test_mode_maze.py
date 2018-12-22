@@ -5,7 +5,7 @@
 
 from pytest import mark
 
-from advent.mode_maze import erosion_level, geologic_index, part1
+from advent.mode_maze import erosion_level, geologic_index, part1, part2
 
 test_geologic_index_data = [
     [(0, 0), 0],
@@ -35,3 +35,7 @@ def test_erosion_level(coords, depth, level):
 
 def test_part1():
     assert 114 == part1((10, 10), 510)
+
+
+def test_part2():
+    assert 45 == part2((10, 10), 510)
