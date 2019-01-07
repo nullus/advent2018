@@ -3,7 +3,10 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
-from advent.settlers_of_the_north_pole import parse, resource_value, next_state, part1
+from pytest import mark
+
+from advent.input import text
+from advent.settlers_of_the_north_pole import parse, resource_value, next_state, part1, part2
 
 test_area_initial_str = r'''
 .#.#...|#.
@@ -65,3 +68,12 @@ def test_next_state():
 
 def test_part1():
     assert 1147 == part1(test_area_initial_str)
+
+
+def test_part1_with_puzzle_input():
+    assert 355918 == part1(text("settlers_of_the_north_pole"))
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert 202806 == part2(text("settlers_of_the_north_pole"), 1_000_000_000)

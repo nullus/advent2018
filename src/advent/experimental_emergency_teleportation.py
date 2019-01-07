@@ -49,8 +49,9 @@ def _count_in_range(nanobots, coordinates) -> int:
 
 def _sample_range(nanobots, left_coordinate, right_coordinate):
     samples = []
-    for i in range(len(nanobots) * 6):
-        nanobot = nanobots[randrange(0, len(nanobots))]
+    len_nanobots = len(nanobots)
+    for i in range(len_nanobots * 6):
+        nanobot = nanobots[randrange(0, len_nanobots)]
         first = randrange(0, nanobot[1] + 1)
         second = randrange(0, nanobot[1] - first + 1)
         third = nanobot[1] - first - second

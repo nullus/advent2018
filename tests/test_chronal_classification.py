@@ -20,5 +20,9 @@ def test_part1():
     assert 1 == part1(test_data)
 
 
+def test_part1_with_puzzle_input():
+    assert 521 == part1(text('chronal_classification'))
+
+
 def test_part2_with_puzzle_input():
     assert 594 == part2(text('chronal_classification'), text('chronal_classification_program'))

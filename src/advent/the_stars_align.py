@@ -62,5 +62,3 @@ def part1(particles_text: str) -> Tuple[int, str]:
         result += "\n"
 
     return seconds, result
-
-

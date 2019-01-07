@@ -68,6 +68,7 @@ def test_battle_space_is_empty(x, y, is_empty):
     assert is_empty == Battle(test_battle1).is_empty(Vector(x, y))
 
 
+@mark.slow
 def test_part1_with_puzzle_input():
     assert 245280 == part1(text('beverage_bandits'))
 
@@ -75,4 +76,3 @@ def test_part1_with_puzzle_input():
 @mark.slow
 def test_part2_with_puzzle_input():
     assert 74984 == part2(text('beverage_bandits'))
-

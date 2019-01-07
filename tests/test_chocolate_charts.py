@@ -6,7 +6,7 @@
 from pytest import mark
 
 from advent.chocolate_charts import part1, part2
-
+from advent.input import text
 
 test_data_initial_state = [3, 7]
 
@@ -35,3 +35,11 @@ test_part2_data = [
 def test_part2(recipes, sequence):
     assert recipes == part2(test_data_initial_state, sequence)
 
+
+def test_part1_with_puzzle_input():
+    assert "1776718175" == part1(test_data_initial_state, int(text("chocolate_charts")))
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert 20220949 == part2(test_data_initial_state, text("chocolate_charts"))

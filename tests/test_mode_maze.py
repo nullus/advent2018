@@ -39,3 +39,12 @@ def test_part1():
 
 def test_part2():
     assert 45 == part2((10, 10), 510)
+
+
+def test_part1_with_puzzle_input():
+    assert 6_318 == part1((7, 782), 11_820)
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert 1_075 == part2((7, 782), 11_820)

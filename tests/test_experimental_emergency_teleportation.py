@@ -3,7 +3,10 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
+from pytest import mark
+
 from advent.experimental_emergency_teleportation import part1, part2
+from advent.input import text
 
 test_data = """
 pos=<0,0,0>, r=4
@@ -34,3 +37,12 @@ pos=<10,10,10>, r=5
 
 def test_part2():
     assert 36 == part2(test_part2_data)
+
+
+def test_part1_with_puzzle_input():
+    assert 248 == part1(text("experimental_emergency_teleportation"))
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert 124623002 == part2(text("experimental_emergency_teleportation"))

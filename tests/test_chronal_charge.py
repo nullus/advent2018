@@ -6,6 +6,7 @@
 from pytest import mark
 
 from advent.chronal_charge import power_level, part1, part2
+from advent.input import text
 
 
 def test_power_level():
@@ -45,3 +46,12 @@ test_part2_data = [
 @mark.parametrize("serial, coordinates", test_part2_data)
 def test_part2(serial, coordinates):
     assert coordinates == part2(serial)
+
+
+def test_part1_with_puzzle_input():
+    assert (235, 14) == part1(int(text("chronal_charge")))
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert (237, 227, 14) == part2(int(text("chronal_charge")))

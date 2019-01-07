@@ -4,6 +4,8 @@
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
 from pytest import mark
+
+from advent.input import text
 from advent.inventory_management_system import is_letter_repeated_2_3_times, part1, part2, common_characters
 
 
@@ -63,3 +65,11 @@ test_common_characters_data = [
 @mark.parametrize("this, that, common", test_common_characters_data)
 def test_common_characters(this, that, common):
     assert common == common_characters(this, that)
+
+
+def test_part1_with_puzzle_input():
+    assert 9633 == part1(text("inventory_management_system"))
+
+
+def test_part2_with_puzzle_input():
+    assert "lujnogabetpmsydyfcovzixaw" == part2(text("inventory_management_system"))

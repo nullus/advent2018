@@ -3,6 +3,9 @@
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
+from pytest import mark
+
+from advent.input import text
 from advent.the_stars_align import parser, part1
 
 test_data = """
@@ -63,3 +66,8 @@ def test_part1():
 
 def test_part2():
     assert 3 == part1(test_data)[0]
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert 10003 == part1(text("the_stars_align"))[0]

@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
-
+from advent.input import text
 from advent.no_matter_how_you_slice_it import part1, part2, parse_claims_text, Claim
 
 test_data = """
@@ -22,3 +22,11 @@ def test_part1():
 
 def test_part2():
     assert "#3" == part2(test_data)
+
+
+def test_part1_with_puzzle_input():
+    assert 118223 == part1(text("no_matter_how_you_slice_it"))
+
+
+def test_part2_with_puzzle_input():
+    assert "#412" == part2(text("no_matter_how_you_slice_it"))

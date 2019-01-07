@@ -5,7 +5,7 @@
 
 from pytest import mark
 from advent.chronal_calibration import part1, part2
-
+from advent.input import text
 
 test_part1_data = [
     ["+1 +1 +1", 3],
@@ -30,3 +30,11 @@ test_part2_data = [
 @mark.parametrize("adjustment, frequency", test_part2_data)
 def test_part2(adjustment, frequency):
     assert part2(adjustment) == frequency
+
+
+def test_part1_with_puzzle_input():
+    assert 500 == part1(text("chronal_calibration"))
+
+
+def test_part2_with_puzzle_input():
+    assert 709 == part2(text("chronal_calibration"))

@@ -25,3 +25,12 @@ def test_part1(args, score):
 @mark.parametrize("args, score", test_data)
 def test_part2(args, score):
     assert score == part2(*args)
+
+
+def test_part1_with_puzzle_input():
+    assert 375_414 == part1(459, 71_320)
+
+
+@mark.slow
+def test_part2_with_puzzle_input():
+    assert 3_168_033_673 == part2(459, 7_132_000)

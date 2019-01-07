@@ -55,12 +55,9 @@ def test_part1():
 def test_target_defenders():
     immune, infection = parse(test_data)
     targets = choose_targets(immune, infection)
-    # Infection group 2 attacks defending group 2, killing 84 units
-    # Immune System group 2 attacks defending group 1, killing 4 units
-    # Immune System group 1 attacks defending group 2, killing 51 units
-    # Infection group 1 attacks defending group 1, killing 17 units
-    assert targets[immune[1]] == infection[0]
+
     assert targets[immune[0]] == infection[1]
+    assert targets[immune[1]] == infection[0]
     assert targets[infection[0]] == immune[0]
     assert targets[infection[1]] == immune[1]
 
@@ -69,5 +66,6 @@ def test_unit_effective_strength():
     assert 65536 == Unit(256, 1, 2, 256, 'Potato', set(), set()).effective_strength
 
 
+@mark.slow
 def test_part2_with_puzzle_input():
     assert 8291 == part2(text("immune_system_simulator_20xx"))

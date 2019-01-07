@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2018, Dylan Perry <dylan.perry@gmail.com>. All rights reserved.
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
-
+from advent.input import text
 from advent.response_record import part1, part2, impl1
 
 test_response_record_data = """
@@ -36,3 +36,11 @@ def test_part2():
 
 def test_impl1():
     assert [240, 4455] == list(impl1(test_response_record_data))
+
+
+def test_part1_with_puzzle_input():
+    assert 151754 == part1(text("response_record"))
+
+
+def test_part2_with_puzzle_input():
+    assert 19896 == part2(text("response_record"))
