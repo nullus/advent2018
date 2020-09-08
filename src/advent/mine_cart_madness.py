@@ -4,7 +4,75 @@
 # Licensed under BSD 2-Clause License. See LICENSE file for full license.
 
 from itertools import cycle
-from typing import Tuple, List, Set, Iterator
+from math import ceil
+from operator import sub
+from typing import Tuple, List, Set, Iterator, NamedTuple, Optional
+
+
+class Vector(NamedTuple):
+    # Preserve ordering to maintain
+    y: int
+    x: int
+
+    def __sub__(self, other: 'Vector') -> 'Vector':
+        if not isinstance(other, Vector):
+            raise ValueError(f"Expected type {Vector}, got {type(other)}")
+        return Vector(*map(sub, self, other))
+
+
+class Body(object):
+
+    def __init__(self, position: Vector, velocity: Vector = Vector(0, 0)) -> None:
+        super().__init__()
+
+        self.position = position
+        self.velocity = velocity
+
+    def collision_time(self, other: 'Body') -> Optional[int]:
+        """
+        Solve collision as complex division between origin and velocity deltas
+
+        Positive, real result indicates time of collision. Otherwise return None
+        """
+
+        if not isinstance(other, Body):
+            raise ValueError(f"Expected type {Body}, got {type(other)}")
+
+        delta_origin = other.position - self.position
+        delta_velocity = self.velocity - other.velocity
+
+        denominator = delta_velocity.x * delta_velocity.x + delta_velocity.y * delta_velocity.y
+        real = delta_origin.x * delta_velocity.x + delta_origin.y * delta_velocity.y
+        imaginary = delta_origin.y * delta_velocity.x - delta_origin.x * delta_velocity.y
+
+        if denominator != 0 and imaginary == 0 and real > 0:
+            return ceil(real / denominator)
+        else:
+            return None
+
+
+class Event(object):
+
+    def __init__(self, position: Vector, tick: int) -> None:
+        super().__init__()
+
+        self.tick = tick
+        self.position = position
+
+    def __lt__(self, other: object) -> bool:
+        return isinstance(other, Event) and self._id() < other._id()
+
+    def _id(self) -> Tuple[int, Vector]:
+        return self.tick, self.position
+
+
+class Turn(object):
+    pass
+
+
+class Simulation(object):
+
+
 
 
 class Cart(object):
